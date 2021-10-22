@@ -2,7 +2,7 @@ import phrasal_task as pt
 import pandas as pd
 import matplotlib.pyplot as plt
 
-num_model = 5
+num_model = 6
 
 class Model_result():
 
@@ -59,7 +59,7 @@ class Model_result():
         return df_mean
 
 
-def plot_expected_rankings(models, phrase_type):
+def plot_expected_rankings(models, phrase_type): # plot ranking of expected instrument for all phrases
     phrase_list = []
 
     for model in models:
@@ -74,7 +74,38 @@ def plot_expected_rankings(models, phrase_type):
     plt.legend()
     plt.show()
 
+def plot_ranking_type(models, phrase_type, fig_size): # instruments'rankings are collasped by types for each model
+    num_row = fig_size[0]
+    num_col = fig_size[1]
+    fig, axs = plt.subplots(num_row, num_col)
+    instrument_type = []
+    handles = None
+    labels = None
+    for i in range(num_row):
+        for j in range(num_col):
+            model = models[i*num_col + j]
+            df_model = model.get_mean_rankings(phrase_type)
+            if i==0 and j==0:
+                instrument_type = list(df_model)[1:]
+            mean_ranking = df_model[instrument_type].mean(axis=0)
 
+
+            axs[i, j].bar(instrument_type, mean_ranking, color = ['red','blue','purple'])
+            axs[i, j].set_title(model.model_name)
+            axs[i, j].set_xticks([])
+
+            if i+1 == num_row and j+1 == num_col:
+                handles, labels = axs[i,j].get_legend_handles_labels()
+
+
+
+    for ax in axs.flat:
+        ax.set(xlabel='Instrument Type', ylabel='Average Ranking')
+        ax.label_outer()
+
+
+    fig.legend(handles, labels, loc='upper center')
+    plt.show()
 
 
 def get_models():
@@ -90,6 +121,7 @@ def get_models():
 def main():
     models = get_models()
     plot_expected_rankings(models, 'control')
+    plot_ranking_type(models, 'control',(2,3))
 
 
 main()
